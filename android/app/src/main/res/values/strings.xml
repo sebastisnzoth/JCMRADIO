@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">JCMRADIO</string>
+    <string name="title_activity_main">JCMRADIO</string>
+    <string name="package_name">com.sebastisnzoth.jcmradio</string>
+    <string name="custom_url_scheme">com.sebastisnzoth.jcmradio</string>
+</resources>
