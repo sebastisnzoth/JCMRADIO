@@ -5,6 +5,7 @@
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
+import { Analytics } from '@vercel/analytics/react';
 import UserApp from './components/UserApp';
 import AdminDashboard from './components/AdminDashboard';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -22,6 +23,7 @@ export default function App() {
           <Toaster position="top-center" richColors />
         </div>
       </Router>
+      <Analytics />
     </ErrorBoundary>
   );
 }
