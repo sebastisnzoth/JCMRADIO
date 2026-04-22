@@ -60,6 +60,14 @@ service cloud.firestore {
              data.sentAt is string;
     }
 
+    function isValidChatMessage(data) {
+      return data.keys().hasAll(['message', 'senderName', 'createdAt', 'uid']) &&
+             data.message is string && data.message.size() > 0 && data.message.size() < 500 &&
+             data.senderName is string && data.senderName.size() > 0 && data.senderName.size() < 50 &&
+             data.createdAt is timestamp &&
+             data.uid is string;
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
@@ -78,6 +86,11 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
       allow write: if isAdmin();
+    }
+
+    match /chat/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidChatMessage(request.resource.data) && request.resource.data.uid == request.auth.uid;
     }
   }
 }

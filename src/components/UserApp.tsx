@@ -3,10 +3,11 @@ import { db, OperationType, handleFirestoreError } from '../firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { AppConfig } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { Share2, Tv, Instagram, Facebook, MessageCircle, Camera } from 'lucide-react';
+import { Share2, Tv, Instagram, Facebook, MessageCircle, Camera, Play, Pause } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import VideoRecorder from './VideoRecorder';
+import Chat from './Chat';
 
 interface RadioInfo {
   title: string;
@@ -30,11 +31,15 @@ export default function UserApp() {
   const [radioInfo, setRadioInfo] = useState<RadioInfo | null>(null);
   const [albumArt, setAlbumArt] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
+
+  const togglePlayback = () => setIsPlaying(!isPlaying);
 
   useEffect(() => {
     const fetchRadioInfo = async () => {
       try {
-        const response = await fetch('https://sp.aljania.com/cp/get_info.php?p=8120');
+        const response = await fetch('/api/radio-info');
         if (response.ok) {
           const data = await response.json();
           setRadioInfo(data);
@@ -186,49 +191,63 @@ export default function UserApp() {
       {/* Main Content */}
       <main className="flex-1 w-full max-w-md md:max-w-lg lg:max-w-xl flex flex-col items-center justify-center p-6 md:p-8 gap-8 md:gap-10 z-10">
         
-        {/* Glassmorphism Player Card */}
-        <div className="w-full bg-white/5 backdrop-blur-2xl rounded-[2rem] p-8 border border-white/10 shadow-2xl flex flex-col items-center gap-8">
+        {/* Technical Hardware Player Card */}
+        <div className="w-full bg-gradient-to-b from-[#1a1b1e] to-[#0d0e11] rounded-3xl p-6 md:p-8 border border-[#2A2B2E] shadow-2xl flex flex-col items-center gap-8">
           
-          {/* Circular Cover */}
-          <div className="relative cursor-pointer group" onClick={() => setShowCamera(true)}>
-            <div className="w-56 h-56 md:w-72 md:h-72 rounded-full p-1 bg-gradient-to-tr from-white/10 to-white/5 shadow-inner group-hover:scale-105 transition-transform duration-500">
+          {/* Album Art with Hardware Housing */}
+          <div className="relative group p-4 border border-[#2A2B2E] rounded-3xl bg-[#08090b]">
+            <div className="w-56 h-56 md:w-64 md:h-64 rounded-2xl overflow-hidden shadow-inner relative">
               <img
                 src={albumArt || radioInfo?.art || "https://picsum.photos/seed/radio/800/800"}
                 alt="Cover"
-                className="w-full h-full rounded-full object-cover shadow-2xl"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                <Camera size={48} className="text-white/80" />
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-tr from-black/40 to-transparent" />
             </div>
-            {/* Live Pulse */}
-            <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
+
+            {/* Live Indicator Widget */}
+            <div className="absolute top-6 left-6 flex items-center gap-2 bg-[#08090b]/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#2A2B2E]">
               <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-white/80">En Vivo</span>
+              <span className="text-[9px] font-mono font-bold uppercase tracking-[0.2em] text-[#8E9299]">En Vivo</span>
             </div>
           </div>
 
-          {/* Radio Info */}
+          {/* Visual Player Controls */}
+          <div className="flex items-center justify-center gap-6 w-full">
+            <button 
+              onClick={togglePlayback}
+              className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform shadow-lg shadow-white/5"
+            >
+              {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
+            </button>
+            <div className="text-[#6E7279] text-sm font-mono tracking-widest uppercase">
+              {isPlaying ? "Reproduciendo" : "Pausado"}
+            </div>
+          </div>
+
+          {/* Radio Info Section */}
           <div className="w-full text-center space-y-2">
-            <h2 className="text-3xl font-light tracking-tight text-white">
+            <h2 className="text-2xl font-bold tracking-tight text-white font-sans uppercase tracking-[0.08em]">
               JCMC Radio
             </h2>
-            <div className="text-sm font-medium text-white/50 truncate">
+            <p className="text-sm font-mono text-[#6E7279] tracking-tighter truncate px-4">
               {radioInfo?.title || "Transmisión en vivo"}
-            </div>
+            </p>
           </div>
 
-          {/* Player Iframe */}
-          <div className="w-full rounded-2xl overflow-hidden border border-white/5 bg-black/20">
-            <iframe 
-              src="https://sp.aljania.com/cp/widgets/player/single/?p=8120" 
-              height="100" 
-              width="100%" 
-              scrolling="no" 
-              style={{ border: 'none' }}
-              title="SonicPanel Player"
-            />
+          {/* Technical Player Iframe Wrapper */}
+          <div className="w-full border-t border-[#2A2B2E] pt-6">
+            <div className="rounded-xl overflow-hidden border border-[#2A2B2E]">
+              <iframe 
+                src="https://sp.aljania.com/cp/widgets/player/single/?p=8120" 
+                height="80" 
+                width="100%" 
+                scrolling="no" 
+                style={{ border: 'none' }}
+                title="SonicPanel Player"
+              />
+            </div>
           </div>
         </div>
 
@@ -247,6 +266,13 @@ export default function UserApp() {
           >
             <MessageCircle size={20} />
             CABINA
+          </button>
+          <button
+            onClick={() => setShowChat(true)}
+            className="flex flex-col items-center justify-center gap-2 py-4 bg-white/5 border border-white/10 rounded-2xl text-white/80 font-medium text-xs hover:bg-white/10 hover:text-white transition-all"
+          >
+            <MessageCircle size={20} />
+            CHAT
           </button>
           <button
             onClick={() => setShowCamera(true)}
@@ -277,6 +303,7 @@ export default function UserApp() {
 
       <AnimatePresence>
         {showCamera && <VideoRecorder onClose={() => setShowCamera(false)} />}
+        {showChat && <Chat onClose={() => setShowChat(false)} />}
       </AnimatePresence>
     </div>
   );
