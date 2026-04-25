@@ -34,6 +34,7 @@ export interface AppConfig {
   socialLinks: SocialLinks;
   popupAlert?: PopupAlert;
   quickLinks: QuickLink[];
+  authorizedAdmins: string[];
 }
 
 export interface NotificationRecord {

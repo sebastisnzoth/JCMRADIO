@@ -3,11 +3,9 @@ import { db, OperationType, handleFirestoreError } from '../firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { AppConfig } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { Share2, Tv, Instagram, Facebook, MessageCircle, Camera, Play, Pause } from 'lucide-react';
+import { Share2, Instagram, Facebook, Play, Pause } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import VideoRecorder from './VideoRecorder';
-import Chat from './Chat';
 
 interface RadioInfo {
   title: string;
@@ -30,8 +28,6 @@ export default function UserApp() {
   const [countdown, setCountdown] = useState(0);
   const [radioInfo, setRadioInfo] = useState<RadioInfo | null>(null);
   const [albumArt, setAlbumArt] = useState<string | null>(null);
-  const [showCamera, setShowCamera] = useState(false);
-  const [showChat, setShowChat] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
 
   const togglePlayback = () => setIsPlaying(!isPlaying);
@@ -213,16 +209,33 @@ export default function UserApp() {
             </div>
           </div>
 
-          {/* Visual Player Controls */}
-          <div className="flex items-center justify-center gap-6 w-full">
-            <button 
-              onClick={togglePlayback}
-              className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform shadow-lg shadow-white/5"
-            >
-              {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
-            </button>
-            <div className="text-[#6E7279] text-sm font-mono tracking-widest uppercase">
-              {isPlaying ? "Reproduciendo" : "Pausado"}
+          {/* Visual Player Controls & Equalizer */}
+          <div className="flex flex-col items-center gap-6 w-full">
+            <div className="flex items-center justify-center gap-6 w-full">
+              <button 
+                onClick={togglePlayback}
+                className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform shadow-lg shadow-white/5"
+              >
+                {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
+              </button>
+              <div className="flex items-end gap-1 h-6">
+                {[...Array(5)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    animate={isPlaying ? { height: [10, 24, 12, 22, 10] } : { height: 4 }}
+                    transition={{
+                      duration: 0.8,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: i * 0.1,
+                    }}
+                    className="w-1 bg-blue-500 rounded-full"
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="text-[#6E7279] text-xs font-mono tracking-widest uppercase">
+              {isPlaying ? "En Vivo: Transmitiendo Audio" : "Pausado"}
             </div>
           </div>
 
@@ -237,53 +250,43 @@ export default function UserApp() {
           </div>
 
           {/* Technical Player Iframe Wrapper */}
-          <div className="w-full border-t border-[#2A2B2E] pt-6">
-            <div className="rounded-xl overflow-hidden border border-[#2A2B2E]">
+          <div className="w-full border-t border-[#2A2B2E] pt-6 space-y-4">
+            <motion.div 
+              whileHover={{ scale: 1.01 }}
+              transition={{ duration: 0.3 }}
+              className="w-full h-20 md:h-24 rounded-xl overflow-hidden border border-[#2A2B2E] shadow-lg shadow-black/40 hover:shadow-blue-900/20 transition-shadow duration-300"
+            >
               <iframe 
                 src="https://sp.aljania.com/cp/widgets/player/single/?p=8120" 
-                height="80" 
-                width="100%" 
+                className="w-full h-full"
                 scrolling="no" 
                 style={{ border: 'none' }}
                 title="SonicPanel Player"
               />
+            </motion.div>
+            
+            {/* Advanced Controls Placeholder Section */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-[#18181B] border border-[#2A2B2E] rounded-xl p-3 flex flex-col items-center justify-center font-mono text-xs">
+                <span className="text-[#6E7279] uppercase tracking-wider text-[10px]">DJ</span>
+                <span className="text-white font-bold tracking-tight mt-1">En Vivo</span>
+              </div>
+              <div className="bg-[#18181B] border border-[#2A2B2E] rounded-xl p-3 flex flex-col items-center justify-center font-mono text-xs">
+                <span className="text-[#6E7279] uppercase tracking-wider text-[10px]">Bitrate</span>
+                <span className="text-white font-bold tracking-tight mt-1">128 kbps</span>
+              </div>
+            </div>
+            <div className="bg-[#18181B] border border-[#2A2B2E] rounded-xl p-4">
+              <span className="text-[#6E7279] uppercase tracking-wider text-[10px] font-mono">Historial (Placeholder)</span>
+              <ul className="mt-2 space-y-1 font-mono text-xs text-white/70">
+                <li className="flex justify-between items-center bg-black/30 p-2 rounded-lg"><span>Track A</span> <span className="text-[9px]">00:00</span></li>
+                <li className="flex justify-between items-center bg-black/30 p-2 rounded-lg"><span>Track B</span> <span className="text-[9px]">00:00</span></li>
+              </ul>
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="grid grid-cols-3 w-full gap-3 md:gap-4">
-          <button
-            onClick={() => window.open(config.tvLink, '_blank')}
-            className="flex flex-col items-center justify-center gap-2 py-4 bg-white/5 border border-white/10 rounded-2xl text-white/80 font-medium text-xs hover:bg-white/10 hover:text-white transition-all"
-          >
-            <Tv size={20} />
-            TV EN VIVO
-          </button>
-          <button
-            onClick={openWhatsApp}
-            className="flex flex-col items-center justify-center gap-2 py-4 bg-white/5 border border-white/10 rounded-2xl text-white/80 font-medium text-xs hover:bg-white/10 hover:text-white transition-all"
-          >
-            <MessageCircle size={20} />
-            CABINA
-          </button>
-          <button
-            onClick={() => setShowChat(true)}
-            className="flex flex-col items-center justify-center gap-2 py-4 bg-white/5 border border-white/10 rounded-2xl text-white/80 font-medium text-xs hover:bg-white/10 hover:text-white transition-all"
-          >
-            <MessageCircle size={20} />
-            CHAT
-          </button>
-          <button
-            onClick={() => setShowCamera(true)}
-            className="flex flex-col items-center justify-center gap-2 py-4 bg-white/5 border border-white/10 rounded-2xl text-white/80 font-medium text-xs hover:bg-white/10 hover:text-white transition-all relative overflow-hidden group"
-          >
-            <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <Camera size={20} className="text-blue-400 group-hover:scale-110 transition-transform" />
-            GRABAR
-          </button>
-        </div>
-      </main>
+        </main>
 
       {/* Footer */}
       <footer className="w-full max-w-md md:max-w-lg lg:max-w-xl p-8 flex flex-col items-center gap-8">
@@ -300,11 +303,6 @@ export default function UserApp() {
           <a href="/admin" className="hover:text-white/40 transition-colors">Panel de Control</a>
         </div>
       </footer>
-
-      <AnimatePresence>
-        {showCamera && <VideoRecorder onClose={() => setShowCamera(false)} />}
-        {showChat && <Chat onClose={() => setShowChat(false)} />}
-      </AnimatePresence>
     </div>
   );
 }

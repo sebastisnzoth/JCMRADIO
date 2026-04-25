@@ -19,44 +19,36 @@ export default function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'ads' | 'notifications' | 'links'>('ads');
+  const [activeTab, setActiveTab] = useState<'ads' | 'notifications' | 'links' | 'admins'>('ads');
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      if (u && u.email === ADMIN_EMAIL) {
-        setUser(u);
-      } else {
-        setUser(null);
-        if (u) signOut(auth);
-      }
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    // Auth listener removed in AdminDashboard
   }, []);
 
   useEffect(() => {
-    if (!user) return;
     const unsubscribe = onSnapshot(doc(db, 'config', 'main'), (snapshot) => {
       if (snapshot.exists()) {
         setConfig(snapshot.data() as AppConfig);
       } else {
         // Initialize default config
-        const defaultConfig: AppConfig = {
-          splashAd: { enabled: false, imageUrl: 'https://picsum.photos/seed/splash/1080/1920', duration: 5 },
-          stickyBanner: { imageUrl: 'https://picsum.photos/seed/banner/1000/200', link: 'https://wa.me/123456789' },
-          tvLink: 'https://youtube.com/live',
-          socialLinks: { whatsapp: '123456789', instagram: 'https://instagram.com', tiktok: 'https://tiktok.com', facebook: 'https://facebook.com' },
-          quickLinks: [
-            { label: 'Sobre Nosotros', url: '#' },
-            { label: 'Locutores', url: '#' },
-            { label: 'Programación', url: '#' },
-            { label: 'Chat en Vivo', url: '#' },
-            { label: 'Pedidos Musicales', url: '#' },
-            { label: 'Noticias', url: '#' },
-            { label: 'Historial', url: '#' },
-            { label: 'VER TV EN VIVO', url: '#' }
-          ]
-        };
+        let defaultConfig: AppConfig;
+        defaultConfig = {
+            splashAd: { enabled: false, imageUrl: 'https://picsum.photos/seed/splash/1080/1920', duration: 5 },
+            stickyBanner: { imageUrl: 'https://picsum.photos/seed/banner/1000/200', link: 'https://wa.me/123456789' },
+            tvLink: 'https://youtube.com/live',
+            socialLinks: { whatsapp: '123456789', instagram: 'https://instagram.com', tiktok: 'https://tiktok.com', facebook: 'https://facebook.com' },
+            quickLinks: [
+              { label: 'Sobre Nosotros', url: '#' },
+              { label: 'Locutores', url: '#' },
+              { label: 'Programación', url: '#' },
+              { label: 'Chat en Vivo', url: '#' },
+              { label: 'Pedidos Musicales', url: '#' },
+              { label: 'Noticias', url: '#' },
+              { label: 'Historial', url: '#' },
+              { label: 'VER TV EN VIVO', url: '#' }
+            ],
+            authorizedAdmins: [ADMIN_EMAIL]
+          };
         setDoc(doc(db, 'config', 'main'), defaultConfig).catch(e => handleFirestoreError(e, OperationType.WRITE, 'config/main'));
       }
     });
@@ -81,33 +73,6 @@ export default function AdminDashboard() {
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-black">Cargando...</div>;
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-10 shadow-2xl text-center space-y-8"
-        >
-          <div className="w-20 h-20 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto">
-            <LayoutDashboard className="text-blue-500" size={40} />
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">Panel Administrativo</h1>
-            <p className="text-zinc-500">Solo personal autorizado de JCMC Radio</p>
-          </div>
-          <button
-            onClick={handleLogin}
-            className="w-full py-4 bg-white text-black rounded-2xl font-bold hover:bg-zinc-200 transition-all flex items-center justify-center gap-3"
-          >
-            <img src="https://www.google.com/favicon.ico" className="w-5 h-5" alt="Google" />
-            Iniciar con Google
-          </button>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-black flex flex-col md:flex-row">
@@ -138,6 +103,12 @@ export default function AdminDashboard() {
             label="Enlaces & TV"
             active={activeTab === 'links'}
             onClick={() => setActiveTab('links')}
+          />
+          <SidebarItem
+            icon={<Settings size={20} />}
+            label="Administradores"
+            active={activeTab === 'admins'}
+            onClick={() => setActiveTab('admins')}
           />
         </nav>
 
@@ -343,6 +314,60 @@ export default function AdminDashboard() {
                   onChange={(newLinks) => setConfig({ ...config, quickLinks: newLinks })}
                   onSave={() => handleSaveConfig(config)}
                 />
+              </motion.div>
+            )}
+
+            {activeTab === 'admins' && config && (
+              <motion.div
+                key="admins"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-8"
+              >
+                <section className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 space-y-6">
+                  <div className="flex items-center gap-3">
+                    <Settings className="text-blue-500" />
+                    <h3 className="text-xl font-bold">Gestión de Administradores</h3>
+                  </div>
+                  <p className="text-zinc-500 text-sm">
+                    Añade correos electrónicos de confianza. Solo estos usuarios podrán acceder a este panel de administración.
+                  </p>
+                  <div className="space-y-4">
+                    {config.authorizedAdmins.map((email, index) => (
+                      <div key={index} className="flex items-center gap-4 p-4 bg-black border border-zinc-800 rounded-xl">
+                        <span className="flex-1 font-mono text-sm">{email}</span>
+                        {email !== ADMIN_EMAIL && (
+                          <button
+                            onClick={() => {
+                              const newAdmins = config.authorizedAdmins.filter((_, i) => i !== index);
+                              handleSaveConfig({ ...config, authorizedAdmins: newAdmins });
+                            }}
+                            className="text-zinc-600 hover:text-red-500 transition-colors"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <div className="flex gap-4">
+                        <input
+                            type="email"
+                            placeholder="nuevo.admin@gmail.com"
+                            className="flex-1 bg-black border border-zinc-800 rounded-xl px-4 py-3 focus:border-blue-500 outline-none"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    const email = (e.target as HTMLInputElement).value;
+                                    if (email) {
+                                        handleSaveConfig({ ...config, authorizedAdmins: [...config.authorizedAdmins, email] });
+                                        (e.target as HTMLInputElement).value = '';
+                                    }
+                                }
+                            }}
+                        />
+                    </div>
+                  </div>
+                </section>
               </motion.div>
             )}
           </AnimatePresence>
