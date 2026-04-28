@@ -188,73 +188,66 @@ export default function UserApp() {
       <main className="flex-1 w-full max-w-md md:max-w-lg lg:max-w-xl flex flex-col items-center justify-center p-6 md:p-8 gap-8 md:gap-10 z-10">
         
         {/* Technical Hardware Player Card */}
-        <div className="w-full bg-gradient-to-b from-[#1a1b1e] to-[#0d0e11] rounded-3xl p-6 md:p-8 border border-[#2A2B2E] shadow-2xl flex flex-col items-center gap-8">
+        <motion.div 
+          whileHover={{ boxShadow: "0 0 40px -10px rgba(59, 130, 246, 0.3)" }}
+          className="w-full bg-[#0d0e11] rounded-3xl p-6 md:p-8 border border-[#2A2B2E] shadow-2xl flex flex-col items-center gap-8 relative overflow-hidden transition-all duration-500"
+        >
+          {/* Dynamic Background Glow */}
+          <div className="absolute inset-x-0 top-0 h-[200px] bg-blue-500/5 blur-[100px] -z-10" />
+          
+          {/* Subtle Glow Overlay */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
           
           {/* Album Art with Hardware Housing */}
-          <div className="relative group p-4 border border-[#2A2B2E] rounded-3xl bg-[#08090b]">
-            <div className="w-56 h-56 md:w-64 md:h-64 rounded-2xl overflow-hidden shadow-inner relative">
+          <div className="relative group p-1 border border-[#2A2B2E] rounded-3xl bg-[#08090b]/50 shadow-inner">
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              className="w-56 h-56 md:w-64 md:h-64 rounded-2xl overflow-hidden shadow-black/80 relative transition-transform duration-500"
+            >
               <img
                 src={albumArt || radioInfo?.art || "https://picsum.photos/seed/radio/800/800"}
                 alt="Cover"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 bg-gradient-to-tr from-black/40 to-transparent" />
-            </div>
+              <div className="absolute inset-0 bg-gradient-to-tr from-black/60 to-transparent" />
+            </motion.div>
 
             {/* Live Indicator Widget */}
-            <div className="absolute top-6 left-6 flex items-center gap-2 bg-[#08090b]/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#2A2B2E]">
+            <div className="absolute top-6 left-6 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#2a2b2e]/60">
               <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
               <span className="text-[9px] font-mono font-bold uppercase tracking-[0.2em] text-[#8E9299]">En Vivo</span>
             </div>
           </div>
 
-          {/* Visual Player Controls & Equalizer */}
-          <div className="flex flex-col items-center gap-6 w-full">
-            <div className="flex items-center justify-center gap-6 w-full">
+          {/* Player Controls & Info */}
+          <div className="flex flex-col items-center gap-4 w-full">
+            <h2 className="text-2xl font-bold tracking-tight text-white font-sans uppercase tracking-[0.05em] mb-1">
+              JCMC Radio
+            </h2>
+            <p className="text-sm font-medium text-[#6E7279] tracking-tighter truncate px-4 font-mono">
+              {radioInfo?.title || "Transmisión en vivo"}
+            </p>
+
+            <div className="flex items-center justify-center gap-8 w-full mt-4">
               <button 
                 onClick={togglePlayback}
-                className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform shadow-lg shadow-white/5"
+                className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform shadow-lg shadow-white/10"
               >
                 {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
               </button>
-              <div className="flex items-end gap-1 h-6">
-                {[...Array(5)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    animate={isPlaying ? { height: [10, 24, 12, 22, 10] } : { height: 4 }}
-                    transition={{
-                      duration: 0.8,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                      delay: i * 0.1,
-                    }}
-                    className="w-1 bg-blue-500 rounded-full"
-                  />
-                ))}
-              </div>
             </div>
-            <div className="text-[#6E7279] text-xs font-mono tracking-widest uppercase">
-              {isPlaying ? "En Vivo: Transmitiendo Audio" : "Pausado"}
+            <div className="text-[#6E7279] text-[10px] font-mono tracking-widest uppercase mt-4">
+              {isPlaying ? "Transmitiendo" : "Pausado"}
             </div>
-          </div>
-
-          {/* Radio Info Section */}
-          <div className="w-full text-center space-y-2">
-            <h2 className="text-2xl font-bold tracking-tight text-white font-sans uppercase tracking-[0.08em]">
-              JCMC Radio
-            </h2>
-            <p className="text-sm font-mono text-[#6E7279] tracking-tighter truncate px-4">
-              {radioInfo?.title || "Transmisión en vivo"}
-            </p>
           </div>
 
           {/* Technical Player Iframe Wrapper */}
-          <div className="w-full border-t border-[#2A2B2E] pt-6 space-y-4">
+          <div className="w-full border-t border-[#2A2B2E] pt-8 space-y-6">
             <motion.div 
               whileHover={{ scale: 1.01 }}
               transition={{ duration: 0.3 }}
-              className="w-full h-20 md:h-24 rounded-xl overflow-hidden border border-[#2A2B2E] shadow-lg shadow-black/40 hover:shadow-blue-900/20 transition-shadow duration-300"
+              className="w-full h-20 md:h-24 rounded-xl overflow-hidden border border-[#2A2B2E] shadow-lg shadow-black/40"
             >
               <iframe 
                 src="https://sp.aljania.com/cp/widgets/player/single/?p=8120" 
@@ -265,26 +258,34 @@ export default function UserApp() {
               />
             </motion.div>
             
-            {/* Advanced Controls Placeholder Section */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-[#18181B] border border-[#2A2B2E] rounded-xl p-3 flex flex-col items-center justify-center font-mono text-xs">
-                <span className="text-[#6E7279] uppercase tracking-wider text-[10px]">DJ</span>
-                <span className="text-white font-bold tracking-tight mt-1">En Vivo</span>
+            {/* Advanced Controls */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-[#18181B]/50 border border-[#2A2B2E] rounded-xl p-4 flex flex-col items-center justify-center font-mono">
+                <span className="text-[#6E7279] uppercase tracking-wider text-[9px] font-bold">DJ</span>
+                <span className="text-white font-medium tracking-tight mt-1 text-sm">{radioInfo?.djusername || 'En Vivo'}</span>
               </div>
-              <div className="bg-[#18181B] border border-[#2A2B2E] rounded-xl p-3 flex flex-col items-center justify-center font-mono text-xs">
-                <span className="text-[#6E7279] uppercase tracking-wider text-[10px]">Bitrate</span>
-                <span className="text-white font-bold tracking-tight mt-1">128 kbps</span>
+              <div className="bg-[#18181B]/50 border border-[#2A2B2E] rounded-xl p-4 flex flex-col items-center justify-center font-mono">
+                <span className="text-[#6E7279] uppercase tracking-wider text-[9px] font-bold">Bitrate</span>
+                <span className="text-white font-medium tracking-tight mt-1 text-sm">{radioInfo?.bitrate || 128} kbps</span>
               </div>
             </div>
-            <div className="bg-[#18181B] border border-[#2A2B2E] rounded-xl p-4">
-              <span className="text-[#6E7279] uppercase tracking-wider text-[10px] font-mono">Historial (Placeholder)</span>
-              <ul className="mt-2 space-y-1 font-mono text-xs text-white/70">
-                <li className="flex justify-between items-center bg-black/30 p-2 rounded-lg"><span>Track A</span> <span className="text-[9px]">00:00</span></li>
-                <li className="flex justify-between items-center bg-black/30 p-2 rounded-lg"><span>Track B</span> <span className="text-[9px]">00:00</span></li>
+
+            <div className="bg-[#18181B]/50 border border-[#2A2B2E] rounded-xl p-4">
+              <span className="text-[#6E7279] uppercase tracking-wider text-[9px] font-bold font-mono">Historial Reciente</span>
+              <ul className="mt-4 space-y-2">
+                {radioInfo?.history?.slice(0, 2).map((track, i) => (
+                  <li key={i} className="flex justify-between items-center bg-black/40 p-2.5 rounded-lg border border-[#2A2B2E]/50">
+                    <span className="text-xs text-white/80 font-mono truncate">{track}</span>
+                    <span className="text-[9px] text-[#6E7279] font-mono">OK</span>
+                  </li>
+                ))}
+                {(!radioInfo?.history || radioInfo.history.length === 0) && (
+                  <li className="text-center text-[10px] text-[#6E7279] font-mono py-2">No disponible</li>
+                )}
               </ul>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         </main>
 
