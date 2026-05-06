@@ -28,6 +28,8 @@ export default function UserApp() {
   const [countdown, setCountdown] = useState(0);
   const [radioInfo, setRadioInfo] = useState<RadioInfo | null>(null);
   const [albumArt, setAlbumArt] = useState<string | null>(null);
+  const [isLoadingRadio, setIsLoadingRadio] = useState(true);
+  const [errorRadio, setErrorRadio] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(true);
 
   const togglePlayback = () => setIsPlaying(!isPlaying);
@@ -35,13 +37,17 @@ export default function UserApp() {
   useEffect(() => {
     const fetchRadioInfo = async () => {
       try {
+        setIsLoadingRadio(true);
         const response = await fetch('/api/radio-info');
-        if (response.ok) {
-          const data = await response.json();
-          setRadioInfo(data);
-        }
+        if (!response.ok) throw new Error('Radio server offline');
+        const data = await response.json();
+        setRadioInfo(data);
+        setErrorRadio(null);
       } catch (error) {
         console.error('Error fetching radio info:', error);
+        setErrorRadio('No disponible');
+      } finally {
+        setIsLoadingRadio(false);
       }
     };
 
@@ -260,27 +266,32 @@ export default function UserApp() {
             
             {/* Advanced Controls */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-[#18181B]/50 border border-[#2A2B2E] rounded-xl p-4 flex flex-col items-center justify-center font-mono">
-                <span className="text-[#6E7279] uppercase tracking-wider text-[9px] font-bold">DJ</span>
-                <span className="text-white font-medium tracking-tight mt-1 text-sm">{radioInfo?.djusername || 'En Vivo'}</span>
+              <div className="bg-[#18181B]/50 border border-[#2A2B2E] rounded-xl p-3 flex flex-col items-center justify-center font-mono">
+                <span className="text-[#6E7279] uppercase tracking-wider text-[8px] font-bold">DJ</span>
+                <span className="text-white font-medium tracking-tight mt-0.5 text-xs truncate max-w-full">{errorRadio ? '-' : (radioInfo?.djusername || 'En Vivo')}</span>
               </div>
-              <div className="bg-[#18181B]/50 border border-[#2A2B2E] rounded-xl p-4 flex flex-col items-center justify-center font-mono">
-                <span className="text-[#6E7279] uppercase tracking-wider text-[9px] font-bold">Bitrate</span>
-                <span className="text-white font-medium tracking-tight mt-1 text-sm">{radioInfo?.bitrate || 128} kbps</span>
+              <div className="bg-[#18181B]/50 border border-[#2A2B2E] rounded-xl p-3 flex flex-col items-center justify-center font-mono">
+                <span className="text-[#6E7279] uppercase tracking-wider text-[8px] font-bold">Bitrate</span>
+                <span className="text-white font-medium tracking-tight mt-0.5 text-xs">{errorRadio ? '-' : (radioInfo?.bitrate || 128) + ' kbps'}</span>
               </div>
             </div>
 
             <div className="bg-[#18181B]/50 border border-[#2A2B2E] rounded-xl p-4">
               <span className="text-[#6E7279] uppercase tracking-wider text-[9px] font-bold font-mono">Historial Reciente</span>
-              <ul className="mt-4 space-y-2">
-                {radioInfo?.history?.slice(0, 2).map((track, i) => (
-                  <li key={i} className="flex justify-between items-center bg-black/40 p-2.5 rounded-lg border border-[#2A2B2E]/50">
-                    <span className="text-xs text-white/80 font-mono truncate">{track}</span>
-                    <span className="text-[9px] text-[#6E7279] font-mono">OK</span>
-                  </li>
-                ))}
-                {(!radioInfo?.history || radioInfo.history.length === 0) && (
-                  <li className="text-center text-[10px] text-[#6E7279] font-mono py-2">No disponible</li>
+              <ul className="mt-3 space-y-1.5 min-h-[60px]">
+                {isLoadingRadio ? (
+                  <li className="text-[10px] text-[#6E7279] font-mono py-2 animate-pulse">Cargando historial...</li>
+                ) : (
+                  <>
+                  {radioInfo?.history?.slice(0, 2).map((track, i) => (
+                    <li key={i} className="flex justify-between items-center bg-black/40 p-2 rounded-md border border-[#2A2B2E]/50">
+                      <span className="text-[10px] text-white/70 font-mono truncate">{track}</span>
+                    </li>
+                  ))}
+                  {(!radioInfo?.history || radioInfo.history.length === 0) && (
+                    <li className="text-[10px] text-[#6E7279] font-mono py-2">No disponible</li>
+                  )}
+                  </>
                 )}
               </ul>
             </div>

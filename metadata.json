@@ -1,5 +1,9 @@
 {
-  "name": "JCMC Radio - Ecosistema Digital",
+  "name": "JCM Radio - Rock",
   "description": "Plataforma de streaming de audio con alta interactividad, gestión de publicidad dinámica y dashboard administrativo.",
-  "requestFramePermissions": ["camera", "microphone"]
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": []
 }
