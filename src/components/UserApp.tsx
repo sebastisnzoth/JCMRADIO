@@ -238,7 +238,7 @@ export default function UserApp() {
             <div className="flex items-center justify-center gap-8 w-full mt-4">
               <button 
                 onClick={togglePlayback}
-                className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform shadow-lg shadow-white/10"
+                className="w-16 h-16 rounded-full bg-[#010101] text-white flex items-center justify-center hover:scale-105 transition-transform shadow-lg shadow-white/10"
               >
                 {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
               </button>
@@ -263,38 +263,6 @@ export default function UserApp() {
                 title="SonicPanel Player"
               />
             </motion.div>
-            
-            {/* Advanced Controls */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-[#18181B]/50 border border-[#2A2B2E] rounded-xl p-3 flex flex-col items-center justify-center font-mono">
-                <span className="text-[#6E7279] uppercase tracking-wider text-[8px] font-bold">DJ</span>
-                <span className="text-white font-medium tracking-tight mt-0.5 text-xs truncate max-w-full">{errorRadio ? '-' : (radioInfo?.djusername || 'En Vivo')}</span>
-              </div>
-              <div className="bg-[#18181B]/50 border border-[#2A2B2E] rounded-xl p-3 flex flex-col items-center justify-center font-mono">
-                <span className="text-[#6E7279] uppercase tracking-wider text-[8px] font-bold">Bitrate</span>
-                <span className="text-white font-medium tracking-tight mt-0.5 text-xs">{errorRadio ? '-' : (radioInfo?.bitrate || 128) + ' kbps'}</span>
-              </div>
-            </div>
-
-            <div className="bg-[#18181B]/50 border border-[#2A2B2E] rounded-xl p-4">
-              <span className="text-[#6E7279] uppercase tracking-wider text-[9px] font-bold font-mono">Historial Reciente</span>
-              <ul className="mt-3 space-y-1.5 min-h-[60px]">
-                {isLoadingRadio ? (
-                  <li className="text-[10px] text-[#6E7279] font-mono py-2 animate-pulse">Cargando historial...</li>
-                ) : (
-                  <>
-                  {radioInfo?.history?.slice(0, 2).map((track, i) => (
-                    <li key={i} className="flex justify-between items-center bg-black/40 p-2 rounded-md border border-[#2A2B2E]/50">
-                      <span className="text-[10px] text-white/70 font-mono truncate">{track}</span>
-                    </li>
-                  ))}
-                  {(!radioInfo?.history || radioInfo.history.length === 0) && (
-                    <li className="text-[10px] text-[#6E7279] font-mono py-2">No disponible</li>
-                  )}
-                  </>
-                )}
-              </ul>
-            </div>
           </div>
         </motion.div>
 
