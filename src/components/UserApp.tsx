@@ -30,9 +30,6 @@ export default function UserApp() {
   const [albumArt, setAlbumArt] = useState<string | null>(null);
   const [isLoadingRadio, setIsLoadingRadio] = useState(true);
   const [errorRadio, setErrorRadio] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
-
-  const togglePlayback = () => setIsPlaying(!isPlaying);
 
   useEffect(() => {
     const fetchRadioInfo = async () => {
@@ -235,29 +232,19 @@ export default function UserApp() {
               {radioInfo?.title || "Transmisión en vivo"}
             </p>
 
-            <div className="flex items-center justify-center gap-8 w-full mt-4">
-              <button 
-                onClick={togglePlayback}
-                className="w-16 h-16 rounded-full bg-[#010101] text-white flex items-center justify-center hover:scale-105 transition-transform shadow-lg shadow-white/10"
-              >
-                {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
-              </button>
-            </div>
-            <div className="text-[#6E7279] text-[10px] font-mono tracking-widest uppercase mt-4">
-              {isPlaying ? "Transmitiendo" : "Pausado"}
-            </div>
+
           </div>
 
           {/* Technical Player Iframe Wrapper */}
-          <div className="w-full border-t border-[#2A2B2E] pt-8 space-y-6">
+          <div className="w-[410px] h-[150px] border-t border-[#2A2B2E] pt-8 space-y-6">
             <motion.div 
               whileHover={{ scale: 1.01 }}
               transition={{ duration: 0.3 }}
-              className="w-full h-20 md:h-24 rounded-xl overflow-hidden border border-[#2A2B2E] shadow-lg shadow-black/40"
+              className="w-full h-full rounded-xl overflow-hidden border border-[#2A2B2E] shadow-lg shadow-black/40"
             >
               <iframe 
                 src="https://sp.aljania.com/cp/widgets/player/single/?p=8120" 
-                className="w-full h-full"
+                className="w-[407px] h-[115px]"
                 scrolling="no" 
                 style={{ border: 'none' }}
                 title="SonicPanel Player"
