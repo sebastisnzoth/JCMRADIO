@@ -39,3 +39,11 @@ jobs:
         with:
           name: app-release
           path: app/build/outputs/bundle/release/*.aab
+
+          - name: Permisos de ejecucion
+        # Añadimos el nombre de tu carpeta antes de /gradlew
+        run: chmod +x NombreDeTuCarpeta/gradlew 
+
+      - name: Construir con Gradle
+        # También aquí indicamos la carpeta
+        run: cd NombreDeTuCarpeta && ./gradlew bundleRelease
