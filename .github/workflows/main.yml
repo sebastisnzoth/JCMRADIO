@@ -6,15 +6,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Actualizado a v4 (compatible con versiones de Node más recientes)
       - uses: actions/checkout@v4
 
-      - name: Configurar Java
-        # Actualizado a v4 para evitar el aviso de deprecación
-        uses: actions/setup-java@v4 
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: gradle
+
+      - name: Dar permisos al constructor (Soluciona Exit Code 1)
+        run: chmod +x gradlew
 
       - name: Decodificar Keystore
         run: echo "${{ secrets.KEYSTORE }}" | base64 --decode > app/jcmradio.jks
@@ -22,19 +24,8 @@ jobs:
       - name: Construir Bundle (.aab)
         run: ./gradlew bundleRelease
         env:
+          # Estas variables deben coincidir con tus Secretos en GitHub
           RELEASE_STORE_FILE: jcmradio.jks
           RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-
-      - name: Subir Archivo Final
-        # Actualizado a v4
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-signed
-          path: app/build/outputs/bundle/release/*.aab
-- name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Construir Bundle (.aab)
-        run: ./gradlew bundleRelease
