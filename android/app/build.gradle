@@ -3,6 +3,12 @@ apply plugin: 'com.android.application'
 android {
     namespace = "com.taskrabbit.app"
     compileSdk = rootProject.ext.compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
     defaultConfig {
         applicationId "com.taskrabbit.app"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -51,21 +57,4 @@ try {
     }
 } catch(Exception e) {
     logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
-}
-
-    signingConfigs {
-        release {
-            // Estas variables las llena GitHub Actions automáticamente
-            storeFile file(System.getenv("RELEASE_STORE_FILE") ?: "jcmradio.jks")
-            storePassword System.getenv("RELEASE_STORE_PASSWORD")
-            keyAlias System.getenv("RELEASE_KEY_ALIAS")
-            keyPassword System.getenv("RELEASE_KEY_PASSWORD")
-        }
-    }
-    buildTypes {
-        release {
-            signingConfig signingConfigs.release
-            ...
-        }
-    }
 }
