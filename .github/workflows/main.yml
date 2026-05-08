@@ -4,14 +4,13 @@ on:
   workflow_dispatch: 
 
 env:
-  # Esto asegura el uso de Node.js 24 y elimina advertencias de versiones antiguas
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar codigo del repositorio
+      - name: Descargar codigo
         uses: actions/checkout@v4
 
       - name: Configurar Java 17
@@ -22,29 +21,26 @@ jobs:
           cache: gradle
 
       - name: Dar permisos al motor de Gradle
-        # Apuntamos a la carpeta android/ donde indicaste que esta el archivo
+        # Entramos a la carpeta android para dar permisos al archivo que subiste
         run: chmod +x android/gradlew
 
       - name: Decodificar Keystore
-        # Extraemos tu llave jcmradio.jks desde los secretos de GitHub 
-        # y la ponemos dentro de android/ para que el proceso la encuentre [cite: 1]
+        # Colocamos tu llave jcmradio.jks dentro de la carpeta android
         run: echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/jcmradio.jks
 
-      - name: Construir App Bundle (.aab)
-        # Entramos a la carpeta android y ejecutamos el comando de construccion
+      - name: Construir Bundle (.aab)
+        # Entramos a la carpeta 'android' antes de ejecutar el comando
         run: |
           cd android
           ./gradlew bundleRelease
         env:
-          # Estas variables se conectan con los secretos que configuraste en GitHub [cite: 1, 3]
           RELEASE_STORE_FILE: jcmradio.jks
           RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
-      - name: Subir el archivo generado
+      - name: Subir Archivo Final
         uses: actions/upload-artifact@v4
         with:
           name: app-release-final
-          # Buscamos el archivo .aab en cualquier subcarpeta para asegurar su descarga
-          path: "**/*.aab"
+          path: "android/app/build/outputs/bundle/release/*.aab"
