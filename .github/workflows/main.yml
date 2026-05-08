@@ -4,6 +4,7 @@ on:
   workflow_dispatch: 
 
 env:
+  # Forza el uso de Node.js 24 para evitar avisos de versiones antiguas
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
@@ -21,15 +22,15 @@ jobs:
           cache: gradle
 
       - name: Dar permisos al motor de Gradle
-        # Entramos a la carpeta android para dar permisos al archivo que subiste
+        # Accedemos directamente a la carpeta donde esta el archivo
         run: chmod +x android/gradlew
 
       - name: Decodificar Keystore
-        # Colocamos tu llave jcmradio.jks dentro de la carpeta android
+        # Colocamos tu llave jcmradio.jks dentro de la carpeta android para que el compilador la vea
         run: echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/jcmradio.jks
 
       - name: Construir Bundle (.aab)
-        # Entramos a la carpeta 'android' antes de ejecutar el comando
+        # Entramos a la carpeta 'android' antes de ejecutar el motor de Gradle
         run: |
           cd android
           ./gradlew bundleRelease
@@ -43,4 +44,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-release-final
+          # Buscamos el archivo generado dentro de la estructura de la carpeta android
           path: "android/app/build/outputs/bundle/release/*.aab"
