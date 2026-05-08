@@ -1,0 +1,33 @@
+name: Generar AAB Firmado
+on:
+  workflow_dispatch: # Esto te permite ejecutarlo manualmente con un botón
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Decodificar Keystore
+        run: echo "${{ secrets.KEYSTORE }}" | base64 --decode > app/jcmradio.jks
+
+      - name: Construir Bundle (.aab)
+        run: ./gradlew bundleRelease
+        env:
+          # Estas variables le dicen a Android dónde está tu firma
+          RELEASE_STORE_FILE: jcmradio.jks
+          RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Subir Archivo Final
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-signed
+          path: app/build/outputs/bundle/release/*.aab
