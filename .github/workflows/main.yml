@@ -4,7 +4,6 @@ on:
   workflow_dispatch: 
 
 env:
-  # Forza el uso de Node.js 24 para evitar avisos de versiones antiguas
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
@@ -21,18 +20,30 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Dar permisos al motor de Gradle
-        # Accedemos directamente a la carpeta donde esta el archivo
-        run: chmod +x android/gradlew
+      - name: Localizar gradlew y preparar entorno
+        run: |
+          # Busca el archivo gradlew en cualquier subcarpeta
+          GRADLEW_PATH=$(find . -name "gradlew" -not -path "*/.*" | head -n 1)
+          
+          if [ -z "$GRADLEW_PATH" ]; then
+            echo "ERROR: No se encontro el archivo 'gradlew'. Revisa que no tenga extension .txt"
+            exit 1
+          fi
+          
+          # Dar permisos de ejecucion
+          chmod +x "$GRADLEW_PATH"
+          
+          # Guardar la ruta de la carpeta para el siguiente paso
+          echo "PROJECT_ROOT=$(dirname "$GRADLEW_PATH")" >> $GITHUB_ENV
+          echo "Usando proyecto en: $(dirname "$GRADLEW_PATH")"
 
       - name: Decodificar Keystore
-        # Colocamos tu llave jcmradio.jks dentro de la carpeta android para que el compilador la vea
-        run: echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/jcmradio.jks
+        # Colocamos la llave jcmradio.jks directamente donde esta el archivo gradlew
+        run: echo "${{ secrets.KEYSTORE }}" | base64 --decode > "${{ env.PROJECT_ROOT }}/jcmradio.jks"
 
-      - name: Construir Bundle (.aab)
-        # Entramos a la carpeta 'android' antes de ejecutar el motor de Gradle
+      - name: Construir con Gradle
         run: |
-          cd android
+          cd "${{ env.PROJECT_ROOT }}"
           ./gradlew bundleRelease
         env:
           RELEASE_STORE_FILE: jcmradio.jks
@@ -40,9 +51,8 @@ jobs:
           RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
-      - name: Subir Archivo Final
+      - name: Subir Resultado
         uses: actions/upload-artifact@v4
         with:
           name: app-release-final
-          # Buscamos el archivo generado dentro de la estructura de la carpeta android
-          path: "android/app/build/outputs/bundle/release/*.aab"
+          path: "**/*.aab"
