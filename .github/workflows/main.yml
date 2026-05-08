@@ -2,6 +2,10 @@ name: Generar AAB Firmado
 on:
   workflow_dispatch: 
 
+env:
+  # Esto elimina la advertencia de Node.js 20
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,17 +19,23 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Dar permisos al constructor (Soluciona Exit Code 1)
+      - name: Permisos de ejecucion
         run: chmod +x gradlew
 
       - name: Decodificar Keystore
-        run: echo "${{ secrets.KEYSTORE }}" | base64 --decode > app/jcmradio.jks
+        # Colocamos la llave en la raiz para evitar errores de ruta
+        run: echo "${{ secrets.KEYSTORE }}" | base64 --decode > jcmradio.jks
 
-      - name: Construir Bundle (.aab)
+      - name: Construir con Gradle
         run: ./gradlew bundleRelease
         env:
-          # Estas variables deben coincidir con tus Secretos en GitHub
-          RELEASE_STORE_FILE: jcmradio.jks
+          RELEASE_STORE_FILE: ../jcmradio.jks
           RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Subir Resultado
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: app/build/outputs/bundle/release/*.aab
