@@ -1,9 +1,16 @@
 {
   "short_name": "JCM Radio",
-  "name": "JCM Radio - Escuchá en vivo",
+  "name": "JCM Radio - La radio que te acompaña",
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#050816",
-  "background_color": "#050816",
-  "icons": []
+  "theme_color": "#020a14",
+  "background_color": "#020a14",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
 }
