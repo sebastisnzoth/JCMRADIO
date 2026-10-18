@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { db, OperationType, handleFirestoreError } from '../firebase';
+import { db } from '../firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { AppConfig } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
@@ -50,7 +50,7 @@ export default function UserApp() {
     };
 
     fetchRadioInfo();
-    const interval = setInterval(fetchRadioInfo, 30000); // Update every 10 seconds
+    const interval = setInterval(fetchRadioInfo, 30000); // Update every 30 seconds
     return () => clearInterval(interval);
   }, []);
 
@@ -103,12 +103,12 @@ export default function UserApp() {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'JCMC Radio',
-        text: 'Escucha JCMC Radio en vivo!',
-        url: window.location.origin,
+        title: 'JCM Radio',
+        text: 'Escuchá JCM Radio en vivo!',
+        url: window.location.href,
       }).catch(console.error);
     } else {
-      navigator.clipboard.writeText(window.location.origin);
+      navigator.clipboard?.writeText(window.location.href).catch(console.warn);
       alert('Enlace copiado al portapapeles');
     }
   };
