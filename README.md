@@ -32,3 +32,14 @@ El servidor Express de desarrollo ofrece `/api/radio-info`; **GitHub Pages es ho
 ## Cambios de la portada (octubre 2026)
 
 Se eliminó el ancho fijo del iframe, se mejoró la navegación accesible y mobile, se agregó una portada editorial y se permite renderizar el sitio sin depender de la llegada de Firestore.
+
+## Publicación en GitHub Pages (diseño 2026)
+
+La rama `feat/jcm-premium-red-2026` incorpora `.github/workflows/pages.yml`.
+Al fusionarla a `main`, GitHub Actions ejecuta `npm ci`, `npm run lint`, `npm run build`, prepara `404.html` para rutas SPA y publica `dist`.
+
+**Configuración requerida en GitHub**: Settings → Pages → Build and deployment → Source: **GitHub Actions**. En planes que no admitan Pages para repositorios privados, convertir el repositorio en público o habilitar un plan compatible (revisar antes que no existan secretos ni datos privados en el historial).
+
+**URL prevista al habilitar Pages**: https://sebastisnzoth.github.io/JCMRADIO/ (no es prueba de que ya esté publicada).
+
+**Limitaciones funcionales**: El endpoint `/api/radio-info` proviene del servidor Express y no corre en GitHub Pages; el reproductor SonicPanel sigue siendo un iframe independiente, pero requiere verificar CORS/embedding y reproducción real. Para usar Google/Firebase Auth en Pages puede requerirse autorizar `sebastisnzoth.github.io` en Firebase Authentication → Settings → Authorized domains. Enlaces de administración están adaptados al prefijo `/JCMRADIO/`.
