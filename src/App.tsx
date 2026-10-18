@@ -12,7 +12,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 export default function App() {
   return (
     <ErrorBoundary>
-      <Router>
+      <Router basename={import.meta.env.BASE_URL}>
         <div className="min-h-screen bg-black text-white font-sans selection:bg-blue-500/30">
           <Routes>
             <Route path="/" element={<UserApp />} />
