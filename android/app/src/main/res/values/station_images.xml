@@ -1,0 +1,5 @@
+<resources>
+    <item name="ic_launcher" type="mipmap">@mipmap/station_icon</item>
+    <item name="ic_launcher_round" type="mipmap">@mipmap/station_icon</item>
+    <item name="ic_launcher_foreground" type="mipmap">@mipmap/station_icon</item>
+</resources>

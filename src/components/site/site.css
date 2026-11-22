@@ -1530,6 +1530,11 @@ html {
 }
 
 @media (max-width: 767px) {
+  .jcm-mute, .jcm-menu-toggle {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
   html {
     scroll-padding-top: 68px;
   }
