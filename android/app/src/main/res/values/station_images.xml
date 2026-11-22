@@ -1,0 +1,6 @@
+<resources>
+    <item name="ic_launcher" type="mipmap">@drawable/station_icon</item>
+    <item name="ic_launcher_round" type="mipmap">@drawable/station_icon</item>
+    <item name="ic_launcher_foreground" type="mipmap">@drawable/station_icon</item>
+    <item name="splash" type="drawable">@drawable/station_icon</item>
+</resources>
