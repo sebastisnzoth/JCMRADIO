@@ -1,3 +1,4 @@
+import { Capacitor, registerPlugin, type PluginListenerHandle } from '@capacitor/core';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 /**
@@ -123,7 +124,56 @@ function useNowPlaying(): NowPlaying | null {
   return info;
 }
 
+interface NativeState { status: PlayerStatus }
+const native = registerPlugin<{
+  getState(): Promise<NativeState>;
+  play(): Promise<NativeState>;
+  pause(): Promise<NativeState>;
+  setVolume(options: { volume: number }): Promise<NativeState>;
+  addListener(name: 'state', listener: (state: NativeState) => void): Promise<PluginListenerHandle>;
+}>('JcmRadio');
+
+function NativeRadioProvider({ children }: { children: ReactNode }) {
+  const [status, setStatus] = useState<PlayerStatus>('idle');
+  const [volume, saveVolume] = useState(readStoredVolume);
+  const [muted, setMuted] = useState(false);
+  const nowPlaying = useNowPlaying();
+  useEffect(() => {
+    let active = true;
+    const update = (state: NativeState) => { if (active) setStatus(state.status); };
+    const sync = () => {
+      if (!document.hidden) void native.getState().then(update).catch(() => update({ status: 'error' }));
+    };
+    const subscription = native.addListener('state', update);
+    void subscription.then(sync).catch(() => update({ status: 'error' }));
+    document.addEventListener('visibilitychange', sync);
+    return () => {
+      active = false;
+      document.removeEventListener('visibilitychange', sync);
+      void subscription.then(handle => handle.remove()).catch(() => {});
+    };
+  }, []);
+  useEffect(() => {
+    void native.setVolume({ volume: muted ? 0 : volume }).catch(() => setStatus('error'));
+    try { localStorage.setItem(VOLUME_STORAGE_KEY, String(volume)); } catch { /* optional */ }
+  }, [volume, muted]);
+  const play = () => { setStatus('loading'); void native.play().catch(() => setStatus('error')); };
+  const pause = () => { void native.pause().catch(() => setStatus('error')); };
+  const isActive = status === 'loading' || status === 'playing';
+  return <RadioContext.Provider value={{
+    status, isActive, volume, muted, canSetVolume: true, nowPlaying, play, pause,
+    toggle: isActive ? pause : play,
+    setVolume: value => { saveVolume(Math.min(1, Math.max(0, value))); if (value > 0) setMuted(false); },
+    toggleMute: () => setMuted(value => !value),
+  }}>{children}</RadioContext.Provider>;
+}
+
 export function RadioProvider({ children }: { children: ReactNode }) {
+  const Provider = Capacitor.getPlatform() === 'android' ? NativeRadioProvider : WebRadioProvider;
+  return <Provider>{children}</Provider>;
+}
+
+function WebRadioProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const wantsPlayback = useRef(false);
   const sourceIndex = useRef(0);
